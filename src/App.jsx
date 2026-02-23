@@ -20,7 +20,7 @@ function App() {
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/beneficiaries" element={<Beneficiaries />} />
         <Route path="/transactions" element={<Transactions />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" dashboardelement={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );

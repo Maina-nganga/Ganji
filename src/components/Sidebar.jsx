@@ -1,28 +1,56 @@
 import { Link } from "react-router-dom";
-import { LayoutDashboard, Wallet, Users, ArrowRightLeft } from "lucide-react";
+import { LayoutDashboard, Wallet, Users, ArrowRightLeft, LogOut } from "lucide-react";
 
 export default function Sidebar() {
   return (
-    <div className="w-64 bg-black border-r border-gray-800 p-6 hidden md:block">
-      <h1 className="text-2xl font-bold text-gold mb-10">Ganji</h1>
+    <div className="w-64 h-screen bg-[#0E0E10] shadow-xl relative flex flex-col justify-between p-6 hidden md:flex rounded-l-3xl overflow-hidden">
+      
+      {/* Gold Glow Effect */}
+      <div className="absolute right-0 top-0 w-[400px] h-[400px] bg-gold opacity-20 blur-[180px] rounded-full -z-10"></div>
+      <div className="absolute left-0 bottom-0 w-[300px] h-[300px] bg-gold opacity-10 blur-[120px] rounded-full -z-10"></div>
 
-      <nav className="flex flex-col gap-6">
-        <Link to="/dashboard" className="flex items-center gap-3 hover:text-gold">
-          <LayoutDashboard size={18} /> Dashboard
-        </Link>
+      {/* Logo */}
+      <div>
+        <h1 className="text-3xl font-bold text-gold mb-10">Ganji</h1>
 
-        <Link to="/wallet" className="flex items-center gap-3 hover:text-gold">
-          <Wallet size={18} /> Wallet
-        </Link>
+        {/* Navigation Links */}
+        <nav className="flex flex-col gap-4 text-gray-300">
+          <Link
+            to="/dashboard"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gold/10 hover:text-gold transition"
+          >
+            <LayoutDashboard size={18} /> Dashboard
+          </Link>
 
-        <Link to="/beneficiaries" className="flex items-center gap-3 hover:text-gold">
-          <Users size={18} /> Beneficiaries
-        </Link>
+          <Link
+            to="/wallet"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gold/10 hover:text-gold transition"
+          >
+            <Wallet size={18} /> Wallet
+          </Link>
 
-        <Link to="/transactions" className="flex items-center gap-3 hover:text-gold">
-          <ArrowRightLeft size={18} /> Transactions
-        </Link>
-      </nav>
+          <Link
+            to="/beneficiaries"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gold/10 hover:text-gold transition"
+          >
+            <Users size={18} /> Beneficiaries
+          </Link>
+
+          <Link
+            to="/transactions"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gold/10 hover:text-gold transition"
+          >
+            <ArrowRightLeft size={18} /> Transactions
+          </Link>
+        </nav>
+      </div>
+
+      {/* Sign Out Button */}
+      <button
+        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#111] text-gold hover:bg-gold hover:text-black transition font-semibold shadow-md"
+      >
+        <LogOut size={18} /> Sign Out
+      </button>
     </div>
   );
 }

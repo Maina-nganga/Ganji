@@ -4,11 +4,7 @@ import { motion } from "framer-motion";
 export default function Login() {
   return (
     <div className="min-h-screen bg-[#0E0E10] text-white relative overflow-hidden">
-
-      {/* Gold Glow */}
       <div className="absolute right-0 top-0 w-[600px] h-[600px] bg-gold opacity-20 blur-[180px] rounded-full"></div>
-
-      {/* Navbar */}
       <nav className="flex justify-between items-center px-12 py-8 relative z-10">
         <h1 className="text-xl font-semibold">
           <span className="text-gold">Ganji</span>
@@ -21,10 +17,10 @@ export default function Login() {
         </div>
       </nav>
 
-      {/* Main Section */}
+      
       <div className="grid md:grid-cols-2 items-center px-12 mt-10 relative z-10">
 
-        {/* Left Side Text */}
+       
         <div>
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
@@ -41,7 +37,7 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Right Side Form */}
+
         <div className="mt-16 md:mt-0 flex justify-center">
           <motion.form
             initial={{ opacity: 0, x: 40 }}
@@ -53,7 +49,7 @@ export default function Login() {
               <input
                 type="email"
                 className="w-full mt-2 p-4 rounded-md bg-black border border-gray-700 focus:border-gold focus:outline-none transition"
-                placeholder="john@example.com"
+                placeholder="user@example.com"
               />
             </div>
 

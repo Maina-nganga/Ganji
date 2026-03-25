@@ -5,7 +5,7 @@ export default function AppLayout({ children }) {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1">
+      <div className="flex-1 md:ml-64">
         <Topbar />
         <div className="p-6">{children}</div>
       </div>

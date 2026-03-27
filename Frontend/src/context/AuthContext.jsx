@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  
   useEffect(() => {
     const fetchUser = async () => {
       if (!token) {
@@ -27,14 +26,13 @@ export const AuthProvider = ({ children }) => {
         if (!res.ok) throw new Error("Session expired");
 
         const data = await res.json();
-        setUser(data);
+        setUser(data); 
       } catch (err) {
         logout();
       } finally {
         setLoading(false);
       }
     };
-
     fetchUser();
   }, [token]);
 
@@ -53,7 +51,8 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ token, user, login, logout, loading }}>
-      {children}
+      
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

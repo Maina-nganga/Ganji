@@ -41,7 +41,7 @@ export default function Beneficiaries() {
           </button>
         </div>
 
-        {/* Search */}
+       
         <div className="relative z-10 mb-8">
           <input
             type="text"
@@ -50,7 +50,7 @@ export default function Beneficiaries() {
           />
         </div>
 
-        {/* Beneficiary List */}
+        
         <div className="relative z-10 grid md:grid-cols-2 gap-6">
           {beneficiaries.map((b) => (
             <motion.div
@@ -75,7 +75,7 @@ export default function Beneficiaries() {
           ))}
         </div>
 
-        {/* Add Beneficiary Modal */}
+      
         {showModal && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
             <motion.div

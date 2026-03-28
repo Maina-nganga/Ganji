@@ -8,16 +8,16 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-[#0E0E10] text-white relative overflow-hidden">
       
-      {/* Gold Glow Background */}
+      
       <div className="absolute right-0 top-0 w-[600px] h-[600px] bg-gold opacity-20 blur-[180px] rounded-full"></div>
 
-      {/* ================= NAVBAR ================= */}
+     
       <nav className="flex justify-between items-center px-6 md:px-12 py-6 relative z-20">
         <Link to="/" className="text-xl font-semibold">
           <span className="text-gold">Ganji</span>
         </Link>
 
-        {/* Desktop Nav */}
+        
         <div className="hidden md:flex gap-10 text-sm text-gray-300">
           <a href="#services" className="hover:text-gold transition">Service</a>
           <a href="#how" className="hover:text-gold transition">How It Works</a>
@@ -36,7 +36,7 @@ export default function Landing() {
           </Link>
         </div>
 
-        {/* Mobile Toggle */}
+       
         <button
           className="md:hidden text-gold"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -45,7 +45,7 @@ export default function Landing() {
         </button>
       </nav>
 
-      {/* Mobile Menu */}
+
       {menuOpen && (
         <div className="md:hidden bg-[#111] border-t border-gold/20 px-6 py-4 space-y-4 text-sm">
           <a href="#services" className="block hover:text-gold">Service</a>
@@ -56,10 +56,10 @@ export default function Landing() {
         </div>
       )}
 
-      {/* ================= HERO SECTION ================= */}
+     
       <section className="grid md:grid-cols-2 items-center px-6 md:px-12 mt-16 md:mt-24 relative z-10">
 
-        {/* Left Content */}
+        
         <div>
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
@@ -113,7 +113,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ================= FEATURES SECTION ================= */}
+     
       <section id="services" className="px-6 md:px-12 mt-32 relative z-10">
         <h2 className="text-3xl font-bold mb-12 text-center">
           Why Choose <span className="text-gold">Ganji</span>
@@ -137,10 +137,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ================= HOW IT WORKS ================= */}
+     
 <section id="how" className="px-6 md:px-12 mt-32 relative z-10 overflow-hidden">
   
-  {/* Gold Glow */}
+
   <div className="absolute -left-20 top-10 w-[400px] h-[400px] bg-gold opacity-20 blur-[160px] rounded-full"></div>
 
   <h2 className="text-3xl font-bold mb-12 text-center relative z-10">
@@ -178,7 +178,7 @@ export default function Landing() {
 
 <section id="benefits" className="px-6 md:px-12 mt-32 relative z-10 overflow-hidden">
   
-  {/* Gold Glow */}
+ 
   <div className="absolute -right-20 top-20 w-[450px] h-[450px] bg-gold opacity-20 blur-[180px] rounded-full"></div>
 
   <h2 className="text-3xl font-bold mb-12 text-center relative z-10">
@@ -227,7 +227,7 @@ export default function Landing() {
 </section>
               
 
-      {/* ================= FOOTER ================= */}
+     
       <footer className="mt-32 border-t border-gold/10 px-6 md:px-12 py-10 text-gray-500 text-sm relative z-10">
         <div className="flex flex-col md:flex-row justify-between gap-6">
           <p>© {new Date().getFullYear()} Ganji. All rights reserved.</p>

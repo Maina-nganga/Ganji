@@ -31,7 +31,6 @@ export default function Login() {
         throw new Error(data.message || "Login failed");
       }
 
-      // Save token + redirect handled inside AuthContext
       login(data.access_token);
 
     } catch (err) {

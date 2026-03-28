@@ -68,11 +68,8 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-[#0E0E10] text-white relative overflow-hidden">
-
-      {/* Glow Background */}
       <div className="absolute right-0 top-0 w-[600px] h-[600px] bg-gold opacity-20 blur-[180px] rounded-full"></div>
-
-      {/* Navbar */}
+     
       <nav className="flex justify-between items-center px-12 py-8 relative z-10">
         <h1 className="text-xl font-semibold">
           <span className="text-gold">AurraPay</span>
@@ -86,10 +83,9 @@ export default function Register() {
         </Link>
       </nav>
 
-      {/* Main Layout */}
       <div className="grid md:grid-cols-2 items-center px-12 mt-10 relative z-10">
 
-        {/* Left Content */}
+       
         <div>
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
@@ -106,7 +102,7 @@ export default function Register() {
           </p>
         </div>
 
-        {/* Form */}
+    
         <div className="mt-16 md:mt-0 flex justify-center">
           <motion.form
             onSubmit={handleSubmit}
@@ -119,7 +115,6 @@ export default function Register() {
               <p className="text-red-500 text-sm text-center">{error}</p>
             )}
 
-            {/* Full Name */}
             <input
               type="text"
               required
@@ -129,7 +124,7 @@ export default function Register() {
               className="w-full px-6 py-4 rounded-full bg-[#151517] border border-gold/20 focus:border-gold focus:shadow-[0_0_15px_rgba(255,215,0,0.4)] focus:outline-none transition"
             />
 
-            {/* Email */}
+      
             <input
               type="email"
               required
@@ -139,7 +134,7 @@ export default function Register() {
               className="w-full px-6 py-4 rounded-full bg-[#151517] border border-gold/20 focus:border-gold focus:shadow-[0_0_15px_rgba(255,215,0,0.4)] focus:outline-none transition"
             />
 
-            {/* Password */}
+         
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -159,7 +154,6 @@ export default function Register() {
               </button>
             </div>
 
-            {/* Password Strength */}
             {password && (
               <p
                 className={`text-sm ${
@@ -174,7 +168,7 @@ export default function Register() {
               </p>
             )}
 
-            {/* Confirm Password */}
+          
             <input
               type="password"
               required
@@ -184,7 +178,6 @@ export default function Register() {
               className="w-full px-6 py-4 rounded-full bg-[#151517] border border-gold/20 focus:border-gold focus:shadow-[0_0_15px_rgba(255,215,0,0.4)] focus:outline-none transition"
             />
 
-            {/* Submit */}
             <button
               disabled={loading}
               type="submit"

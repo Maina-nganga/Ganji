@@ -41,10 +41,10 @@ export default function Wallet() {
     <AppLayout>
       <div className="min-h-screen bg-[#0c0c0e] text-white px-6 md:px-10 py-10 font-sans relative overflow-hidden">
 
-        {/* Background glow */}
+       
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-yellow-400/5 blur-[120px] rounded-full pointer-events-none" />
 
-        {/* Header */}
+       
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center mb-10">
           <div>
             <p className="text-zinc-500 text-sm tracking-widest uppercase mb-1">Your Wallet</p>
@@ -56,11 +56,7 @@ export default function Wallet() {
         </motion.div>
 
         <div className="grid lg:grid-cols-5 gap-8">
-
-          {/* Left Column */}
           <div className="lg:col-span-3 space-y-6">
-
-            {/* Card Carousel */}
             <div className="relative">
               <div className="flex gap-3 mb-5">
                 {cards.map((c, i) => (
@@ -83,7 +79,7 @@ export default function Wallet() {
                   transition={{ duration: 0.3 }}
                   className={`relative bg-gradient-to-br ${cards[activeCard].color} rounded-3xl p-7 shadow-2xl overflow-hidden`}
                 >
-                  {/* Card texture */}
+                  
                   <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
                   <div className="absolute right-6 top-6 opacity-20">
                     <CreditCard size={80} strokeWidth={0.8} />
@@ -109,7 +105,7 @@ export default function Wallet() {
               </AnimatePresence>
             </div>
 
-            {/* Action Buttons */}
+          
             <div className="grid grid-cols-2 gap-4">
               {[
                 { label: "Deposit", icon: ArrowDownLeft, action: "deposit", style: "bg-yellow-400 text-black hover:bg-yellow-300 shadow-yellow-400/20" },
@@ -126,7 +122,6 @@ export default function Wallet() {
               ))}
             </div>
 
-            {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4">
               {[
                 { label: "Total Sent", value: "$12,400", icon: ArrowUpRight, color: "text-red-400" },
@@ -149,7 +144,7 @@ export default function Wallet() {
             </div>
           </div>
 
-          {/* Right Column — Transactions */}
+         
           <div className="lg:col-span-2">
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 h-full">
               <div className="flex justify-between items-center mb-6">
@@ -169,7 +164,7 @@ export default function Wallet() {
                     animate="visible"
                     className="flex items-center gap-4 p-3 rounded-2xl hover:bg-zinc-800/60 transition cursor-pointer group"
                   >
-                    {/* Avatar */}
+                 
                     <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-xs font-bold text-yellow-400 shrink-0">
                       {tx.avatar}
                     </div>
@@ -197,7 +192,7 @@ export default function Wallet() {
           </div>
         </div>
 
-        {/* Modal */}
+        
         <AnimatePresence>
           {modal && (
             <motion.div

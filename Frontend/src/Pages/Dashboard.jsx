@@ -1,5 +1,6 @@
 import AppLayout from "../components/AppLayout";
 import StatCard from "../components/statCard";
+import { useAuth } from "../context/AuthContext"; // CHANGED: imported useAuth
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell,
@@ -20,20 +21,26 @@ const pieData = [
 ];
 
 export default function Dashboard() {
+  const { user } = useAuth(); // CHANGED: pull user from auth context
+
+  // CHANGED: extract first name only (e.g. "Jane" from "Jane Doe"), fallback to "User"
+  const firstName = user?.full_name?.split(" ")[0] ?? "User";
+
   return (
     <AppLayout>
       <div className="min-h-screen bg-[#0c0c0e] text-white px-8 relative py-10 overflow-hidden">
 
-        {/* Glow Effects */}
+        
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-yellow-400/5 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-yellow-400/3 blur-[150px] rounded-full pointer-events-none" />
 
-        {/* Header */}
+    
         <div className="flex justify-between items-center mb-10 relative z-10">
           <div>
             <p className="text-zinc-500 text-sm tracking-widest uppercase mb-1">Overview</p>
             <h1 className="text-4xl font-bold">
-              Welcome Back, <span className="text-yellow-400">John</span>
+              
+              Welcome Back, <span className="text-yellow-400">{firstName}</span>
             </h1>
             <p className="text-zinc-500 mt-2 text-sm">Here's your financial performance overview.</p>
           </div>
@@ -42,7 +49,6 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* KPI Cards */}
         <div className="grid md:grid-cols-4 gap-6 mb-10 relative z-10">
           <StatCard title="Wallet Balance" value="$4,350" />
           <StatCard title="Total Sent" value="$12,400" />
@@ -50,7 +56,7 @@ export default function Dashboard() {
           <StatCard title="Transactions" value="84" />
         </div>
 
-        {/* Charts */}
+        
         <div className="grid lg:grid-cols-3 gap-8 mb-10 relative z-10">
           <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <h2 className="text-yellow-400 text-lg font-semibold mb-6">Monthly Transactions</h2>
@@ -86,7 +92,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Recent Transactions */}
+      
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative z-10">
           <h2 className="text-yellow-400 text-lg font-semibold mb-6">Recent Transactions</h2>
           <div className="overflow-x-auto">

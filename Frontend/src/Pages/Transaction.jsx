@@ -33,11 +33,10 @@ export default function Transactions() {
     <AppLayout>
       <div className="min-h-screen bg-[#0c0c0e] text-white px-8 py-10 relative overflow-hidden">
 
-        {/* Glow Effects */}
+      
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-yellow-400/5 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-yellow-400/3 blur-[150px] rounded-full pointer-events-none" />
 
-        {/* Header */}
         <div className="relative z-10 mb-8">
           <p className="text-zinc-500 text-sm tracking-widest uppercase mb-1">History</p>
           <h1 className="text-3xl font-bold">
@@ -45,7 +44,7 @@ export default function Transactions() {
           </h1>
         </div>
 
-        {/* Search + Filter */}
+        
         <div className="flex flex-col sm:flex-row gap-4 mb-8 relative z-10">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
@@ -70,7 +69,6 @@ export default function Transactions() {
           </div>
         </div>
 
-        {/* Table */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 relative z-10">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-semibold text-lg text-yellow-400">All Transactions</h2>

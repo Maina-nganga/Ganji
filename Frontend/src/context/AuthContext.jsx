@@ -1,60 +1,66 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const navigate = useNavigate();
-  const [token, setToken] = useState(localStorage.getItem("token"));
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem("ganji_token"));
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!token) {
-        setLoading(false);
+  
+  const fetchUser = async (accessToken) => {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        
+        logout();
         return;
       }
 
-      try {
-        const res = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const data = await res.json();
+      setUser(data); // { id, full_name, email }
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!res.ok) throw new Error("Session expired");
 
-        const data = await res.json();
-        setUser(data); 
-      } catch (err) {
-        logout();
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [token]);
+  useEffect(() => {
+    if (token) {
+      fetchUser(token);
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
-  const login = (newToken) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
-    navigate("/dashboard");
+  const login = async (accessToken) => {
+    localStorage.setItem("ganji_token", accessToken);
+    setToken(accessToken);
+    await fetchUser(accessToken); 
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("ganji_token");
     setToken(null);
     setUser(null);
-    navigate("/login");
+    setLoading(false);
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, loading }}>
-      
-      {!loading && children}
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+      {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}

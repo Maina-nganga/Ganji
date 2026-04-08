@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
       }
 
       const data = await res.json();
-      setUser(data); // { id, full_name, email }
+      setUser(data); 
     } catch (err) {
       console.error("Failed to fetch user:", err);
       logout();

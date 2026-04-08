@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +32,8 @@ export default function Login() {
         throw new Error(data.message || "Login failed");
       }
 
-      login(data.access_token);
+      await login(data.access_token);
+      navigate("/dashboard");
 
     } catch (err) {
       setError(err.message);
@@ -92,6 +94,7 @@ export default function Login() {
               <input
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
@@ -103,6 +106,7 @@ export default function Login() {
               <input
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
@@ -117,6 +121,13 @@ export default function Login() {
             >
               {loading ? "Logging in..." : "LOGIN"}
             </button>
+
+            <p className="text-center text-sm text-gray-400">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-gold hover:underline">
+                Sign Up
+              </Link>
+            </p>
           </motion.form>
         </div>
       </div>

@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 
 class Config:
@@ -7,4 +8,4 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "jwt-secret")
-    JWT_ACCESS_TOKEN_EXPIRES = 900  
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)

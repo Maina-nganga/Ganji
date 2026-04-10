@@ -1,0 +1,66 @@
+import { createContext, useContext, useState, useEffect } from "react";
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem("ganji_token"));
+  const [loading, setLoading] = useState(true);
+
+  
+  const fetchUser = async (accessToken) => {
+    try {
+      const res = await fetch("http://127.0.0.1:5000/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        
+        logout();
+        return;
+      }
+
+      const data = await res.json();
+      setUser(data); 
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (token) {
+      fetchUser(token);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const login = async (accessToken) => {
+    localStorage.setItem("ganji_token", accessToken);
+    setToken(accessToken);
+    await fetchUser(accessToken); 
+  };
+
+  const logout = () => {
+    localStorage.removeItem("ganji_token");
+    setToken(null);
+    setUser(null);
+    setLoading(false);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
+}

@@ -6,6 +6,7 @@ from extensions import db, jwt, migrate, bcrypt
 from routes.auth import auth_bp
 from routes.wallet import wallet_bp
 from routes.transaction import transaction_bp
+from routes.mpesa import mpesa_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -32,6 +33,7 @@ def handle_unprocessable_entity(err):
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(wallet_bp, url_prefix="/api/wallet")
 app.register_blueprint(transaction_bp, url_prefix="/api/transactions")
+app.register_blueprint(mpesa_bp, url_prefix="/api/mpesa")
 
 if __name__ == "__main__":
     app.run(debug=True)

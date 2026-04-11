@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import {
   ArrowDownLeft, ArrowUpRight, Plus, CreditCard,
   TrendingUp, Clock, ChevronRight, Eye, EyeOff, Zap,
+  Smartphone, CheckCircle, Loader,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,6 +16,12 @@ const cardVariants = {
   }),
 };
 
+// Deposit method options
+const DEPOSIT_METHODS = [
+  { id: "mpesa", label: "M-Pesa", icon: Smartphone, description: "STK push to your phone" },
+  { id: "manual", label: "Direct", icon: ArrowDownLeft, description: "Manual deposit" },
+];
+
 export default function Wallet() {
   const { token } = useAuth();
   const API = "http://127.0.0.1:5000";
@@ -25,11 +32,14 @@ export default function Wallet() {
 
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [activeCard, setActiveCard] = useState(0);
-  const [modal, setModal] = useState(null);     
+  const [modal, setModal] = useState(null);       // "deposit" | "withdraw" | null
+  const [depositMethod, setDepositMethod] = useState("mpesa"); // "mpesa" | "manual"
   const [amount, setAmount] = useState("");
+  const [phone, setPhone] = useState("");
   const [modalError, setModalError] = useState("");
   const [modalLoading, setModalLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [mpesaPending, setMpesaPending] = useState(false); // waiting for STK callback
 
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -52,7 +62,6 @@ export default function Wallet() {
     },
   ];
 
-  
   const fetchWalletData = async () => {
     setLoading(true);
     setError("");
@@ -101,21 +110,72 @@ export default function Wallet() {
     if (token) fetchWalletData();
   }, [token]);
 
-
   const openModal = (type) => {
     setModal(type);
     setAmount("");
+    setPhone("");
     setModalError("");
     setSuccessMsg("");
+    setMpesaPending(false);
+    if (type === "deposit") setDepositMethod("mpesa");
   };
 
   const closeModal = () => {
     setModal(null);
     setAmount("");
+    setPhone("");
     setModalError("");
+    setMpesaPending(false);
   };
 
- 
+  // ── M-Pesa STK Push ──────────────────────────────────────────
+  const handleMpesaDeposit = async (parsed) => {
+    if (!phone || phone.trim() === "") {
+      return setModalError("Enter your M-Pesa phone number");
+    }
+
+    const res = await fetch(`${API}/api/mpesa/stk-push`, {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify({ amount: parsed, phone: phone.trim() }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "M-Pesa request failed");
+    }
+
+    // STK push sent — show pending state
+    setMpesaPending(true);
+    setSuccessMsg("STK push sent! Check your phone and enter your M-Pesa PIN.");
+
+    // Poll balance every 4s for up to 40s to detect when callback credits the wallet
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      try {
+        const balRes = await fetch(`${API}/api/wallet/`, { headers: authHeaders });
+        const balData = await balRes.json();
+        if (balData.balance !== balance) {
+          clearInterval(poll);
+          setBalance(balData.balance);
+          setSuccessMsg(`KES ${parsed.toFixed(2)} deposited via M-Pesa!`);
+          setMpesaPending(false);
+          await fetchWalletData();
+          setTimeout(() => closeModal(), 1800);
+        }
+      } catch (_) {}
+      if (attempts >= 10) {
+        clearInterval(poll);
+        setMpesaPending(false);
+        setSuccessMsg("Payment initiated. Your balance will update shortly.");
+        setTimeout(() => closeModal(), 2500);
+      }
+    }, 4000);
+  };
+
+  // ── Manual / Withdraw confirm ────────────────────────────────
   const handleConfirm = async () => {
     setModalError("");
     const parsed = parseFloat(amount);
@@ -131,6 +191,12 @@ export default function Wallet() {
     setModalLoading(true);
 
     try {
+      if (modal === "deposit" && depositMethod === "mpesa") {
+        await handleMpesaDeposit(parsed);
+        return; // polling takes over; don't run the rest
+      }
+
+      // Manual deposit or withdrawal
       const endpoint =
         modal === "deposit"
           ? `${API}/api/wallet/deposit`
@@ -154,10 +220,7 @@ export default function Wallet() {
           : `$${parsed.toFixed(2)} withdrawn successfully!`
       );
 
- 
       await fetchWalletData();
-
-     
       setTimeout(() => closeModal(), 1500);
     } catch (err) {
       setModalError(err.message);
@@ -170,6 +233,15 @@ export default function Wallet() {
     n == null
       ? "—"
       : `$${Number(n).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+
+  // ── Derived UI flags ─────────────────────────────────────────
+  const isMpesaDeposit = modal === "deposit" && depositMethod === "mpesa";
+  const confirmLabel = () => {
+    if (modalLoading) return "Processing...";
+    if (mpesaPending) return "Waiting for payment...";
+    if (isMpesaDeposit) return "Send STK Push";
+    return `Confirm ${modal ? modal.charAt(0).toUpperCase() + modal.slice(1) : ""}`;
+  };
 
   return (
     <AppLayout>
@@ -200,7 +272,7 @@ export default function Wallet() {
         <div className="grid lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
 
-          
+            {/* ── Card Carousel ── */}
             <div className="relative">
               <div className="flex gap-3 mb-5">
                 {cards.map((c, i) => (
@@ -268,7 +340,7 @@ export default function Wallet() {
               </AnimatePresence>
             </div>
 
-           
+            {/* ── Action Buttons ── */}
             <div className="grid grid-cols-2 gap-4">
               {[
                 { label: "Deposit", icon: ArrowDownLeft, action: "deposit", style: "bg-yellow-400 text-black hover:bg-yellow-300 shadow-yellow-400/20" },
@@ -285,7 +357,7 @@ export default function Wallet() {
               ))}
             </div>
 
-           
+            {/* ── Stats ── */}
             <div className="grid grid-cols-3 gap-4">
               {[
                 { label: "Total Sent", value: fmt(stats.totalSent), icon: ArrowUpRight, color: "text-red-400" },
@@ -319,7 +391,7 @@ export default function Wallet() {
             </div>
           </div>
 
-       
+          {/* ── Recent Activity ── */}
           <div className="lg:col-span-2">
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 h-full">
               <div className="flex justify-between items-center mb-6">
@@ -376,7 +448,9 @@ export default function Wallet() {
           </div>
         </div>
 
-       
+        {/* ══════════════════════════════════════════
+            MODAL — Deposit / Withdraw
+        ══════════════════════════════════════════ */}
         <AnimatePresence>
           {modal && (
             <motion.div
@@ -396,56 +470,143 @@ export default function Wallet() {
                 <h2 className="text-xl font-bold mb-1 capitalize">{modal} Funds</h2>
                 <p className="text-zinc-500 text-sm mb-6">
                   {modal === "deposit"
-                    ? "Add funds to your wallet."
+                    ? "Choose how you'd like to add funds."
                     : `Available balance: ${fmt(balance)}`}
                 </p>
 
-                
-                {successMsg && (
-                  <div className="mb-4 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm text-center">
-                    {successMsg}
+                {/* ── Deposit Method Selector (deposit only) ── */}
+                {modal === "deposit" && (
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    {DEPOSIT_METHODS.map(({ id, label, icon: Icon, description }) => (
+                      <button
+                        key={id}
+                        onClick={() => {
+                          setDepositMethod(id);
+                          setModalError("");
+                        }}
+                        className={`flex flex-col items-start gap-1.5 p-4 rounded-2xl border transition text-left ${
+                          depositMethod === id
+                            ? "border-yellow-400 bg-yellow-400/5"
+                            : "border-zinc-700 hover:border-zinc-500 bg-zinc-800/50"
+                        }`}
+                      >
+                        <div className={`p-2 rounded-xl ${depositMethod === id ? "bg-yellow-400/15" : "bg-zinc-700"}`}>
+                          <Icon size={16} className={depositMethod === id ? "text-yellow-400" : "text-zinc-400"} />
+                        </div>
+                        <p className={`text-sm font-semibold ${depositMethod === id ? "text-yellow-400" : "text-white"}`}>
+                          {label}
+                        </p>
+                        <p className="text-zinc-500 text-[11px] leading-tight">{description}</p>
+                      </button>
+                    ))}
                   </div>
                 )}
 
-             
+                {/* ── M-Pesa info banner ── */}
+                {isMpesaDeposit && !mpesaPending && !successMsg && (
+                  <div className="flex items-start gap-3 mb-5 px-4 py-3 bg-green-500/8 border border-green-500/20 rounded-2xl">
+                    <Smartphone size={16} className="text-green-400 mt-0.5 shrink-0" />
+                    <p className="text-green-300 text-xs leading-relaxed">
+                      Enter your M-Pesa number and amount. You'll receive an STK push prompt on your phone to confirm.
+                    </p>
+                  </div>
+                )}
+
+                {/* ── Success message ── */}
+                {successMsg && (
+                  <div className="mb-5 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center gap-3">
+                    {mpesaPending ? (
+                      <Loader size={16} className="text-green-400 animate-spin shrink-0" />
+                    ) : (
+                      <CheckCircle size={16} className="text-green-400 shrink-0" />
+                    )}
+                    <p className="text-green-400 text-sm">{successMsg}</p>
+                  </div>
+                )}
+
+                {/* ── Error message ── */}
                 {modalError && (
-                  <div className="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                  <div className="mb-5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm">
                     {modalError}
                   </div>
                 )}
 
-                <div className="relative mb-6">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-400 font-bold text-lg">$</span>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    disabled={modalLoading || !!successMsg}
-                    className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl pl-9 pr-4 py-4 text-white text-lg font-semibold focus:outline-none focus:border-yellow-400 transition disabled:opacity-50"
-                  />
-                </div>
+                {/* ── Phone number field (M-Pesa only) ── */}
+                {isMpesaDeposit && !mpesaPending && (
+                  <div className="relative mb-4">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-medium pointer-events-none">
+                      🇰🇪
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="07XX XXX XXX"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      disabled={modalLoading}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl pl-10 pr-4 py-4 text-white text-base font-medium focus:outline-none focus:border-yellow-400 transition disabled:opacity-50 placeholder:text-zinc-600"
+                    />
+                  </div>
+                )}
 
+                {/* ── Amount field ── */}
+                {!mpesaPending && (
+                  <div className="relative mb-6">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-400 font-bold text-lg pointer-events-none">
+                      {isMpesaDeposit ? "KES" : "$"}
+                    </span>
+                    <input
+                      type="number"
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      disabled={modalLoading || !!successMsg}
+                      className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl pl-14 pr-4 py-4 text-white text-lg font-semibold focus:outline-none focus:border-yellow-400 transition disabled:opacity-50"
+                    />
+                  </div>
+                )}
+
+                {/* ── M-Pesa pending state ── */}
+                {mpesaPending && (
+                  <div className="flex flex-col items-center gap-4 py-4 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+                      <Loader size={28} className="text-green-400 animate-spin" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white font-semibold text-sm">Waiting for M-Pesa confirmation</p>
+                      <p className="text-zinc-500 text-xs mt-1">Enter your PIN on your phone to complete</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Buttons ── */}
                 <div className="flex gap-3">
                   <button
                     onClick={closeModal}
                     disabled={modalLoading}
                     className="flex-1 py-3.5 rounded-2xl border border-zinc-700 text-zinc-400 hover:bg-zinc-800 transition font-medium text-sm disabled:opacity-50"
                   >
-                    Cancel
+                    {mpesaPending ? "Close" : "Cancel"}
                   </button>
-                  <button
-                    onClick={handleConfirm}
-                    disabled={modalLoading || !!successMsg}
-                    className="flex-1 py-3.5 rounded-2xl bg-yellow-400 text-black font-bold text-sm hover:bg-yellow-300 transition disabled:opacity-50"
-                  >
-                    {modalLoading
-                      ? "Processing..."
-                      : `Confirm ${modal.charAt(0).toUpperCase() + modal.slice(1)}`}
-                  </button>
+                  {!mpesaPending && (
+                    <button
+                      onClick={handleConfirm}
+                      disabled={modalLoading || (!!successMsg && !mpesaPending)}
+                      className="flex-1 py-3.5 rounded-2xl bg-yellow-400 text-black font-bold text-sm hover:bg-yellow-300 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {modalLoading && <Loader size={14} className="animate-spin" />}
+                      {confirmLabel()}
+                    </button>
+                  )}
                 </div>
+
+                {/* ── M-Pesa branding note ── */}
+                {isMpesaDeposit && (
+                  <p className="text-center text-zinc-600 text-[11px] mt-4">
+                    Powered by Safaricom M-Pesa · Lipa Na M-Pesa
+                  </p>
+                )}
               </motion.div>
             </motion.div>
           )}

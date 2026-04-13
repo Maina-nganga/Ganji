@@ -9,7 +9,7 @@ import uuid
 
 mpesa_bp = Blueprint("mpesa", __name__)
 
-# Store pending checkout IDs temporarily (use Redis in production)
+
 pending_checkouts = {}
 
 @mpesa_bp.route("/stk-push", methods=["POST"])

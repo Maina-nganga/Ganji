@@ -56,7 +56,6 @@ def deposit():
     db.session.add(tx)
     db.session.commit()
 
-    # Credit the account
     entry = LedgerEntry(
         account_id=account.id,
         transaction_id=tx.id,

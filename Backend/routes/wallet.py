@@ -117,7 +117,7 @@ def withdraw():
     db.session.add(tx)
     db.session.commit()
 
-    # Debit the account
+  
     entry = LedgerEntry(
         account_id=account.id,
         transaction_id=tx.id,

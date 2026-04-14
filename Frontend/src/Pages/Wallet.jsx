@@ -16,11 +16,9 @@ const cardVariants = {
   }),
 };
 
-// Deposit method options
-const DEPOSIT_METHODS = [
-  { id: "mpesa", label: "M-Pesa", icon: Smartphone, description: "STK push to your phone" },
-  { id: "manual", label: "Direct", icon: ArrowDownLeft, description: "Manual deposit" },
-];
+const MPESA_METHOD = { id: "mpesa", label: "M-Pesa", icon: Smartphone, description: "Via Safaricom M-Pesa" };
+const DIRECT_METHOD = { id: "direct", label: "Direct", icon: ArrowDownLeft, description: "Manual transfer" };
+const DIRECT_WITHDRAW = { id: "direct", label: "Direct", icon: ArrowUpRight, description: "Manual withdrawal" };
 
 export default function Wallet() {
   const { token } = useAuth();
@@ -32,14 +30,14 @@ export default function Wallet() {
 
   const [balanceVisible, setBalanceVisible] = useState(true);
   const [activeCard, setActiveCard] = useState(0);
-  const [modal, setModal] = useState(null);       // "deposit" | "withdraw" | null
-  const [depositMethod, setDepositMethod] = useState("mpesa"); // "mpesa" | "manual"
+  const [modal, setModal] = useState(null);
+  const [payMethod, setPayMethod] = useState("mpesa");
   const [amount, setAmount] = useState("");
   const [phone, setPhone] = useState("");
   const [modalError, setModalError] = useState("");
   const [modalLoading, setModalLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [mpesaPending, setMpesaPending] = useState(false); // waiting for STK callback
+  const [mpesaPending, setMpesaPending] = useState(false);
 
   const [balance, setBalance] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -90,13 +88,8 @@ export default function Wallet() {
         })
         .reduce((sum, t) => sum + (t.type === "received" ? t.amount : -t.amount), 0);
 
-      const totalSent = txList
-        .filter((t) => t.type === "sent")
-        .reduce((sum, t) => sum + t.amount, 0);
-
-      const totalReceived = txList
-        .filter((t) => t.type === "received")
-        .reduce((sum, t) => sum + t.amount, 0);
+      const totalSent = txList.filter((t) => t.type === "sent").reduce((sum, t) => sum + t.amount, 0);
+      const totalReceived = txList.filter((t) => t.type === "received").reduce((sum, t) => sum + t.amount, 0);
 
       setStats({ totalSent, totalReceived, thisMonth });
     } catch (err) {
@@ -117,7 +110,7 @@ export default function Wallet() {
     setModalError("");
     setSuccessMsg("");
     setMpesaPending(false);
-    if (type === "deposit") setDepositMethod("mpesa");
+    setPayMethod("mpesa");
   };
 
   const closeModal = () => {
@@ -126,13 +119,12 @@ export default function Wallet() {
     setPhone("");
     setModalError("");
     setMpesaPending(false);
+    setSuccessMsg("");
   };
 
-  // ── M-Pesa STK Push ──────────────────────────────────────────
+ 
   const handleMpesaDeposit = async (parsed) => {
-    if (!phone || phone.trim() === "") {
-      return setModalError("Enter your M-Pesa phone number");
-    }
+    if (!phone.trim()) return setModalError("Enter your M-Pesa phone number");
 
     const res = await fetch(`${API}/api/mpesa/stk-push`, {
       method: "POST",
@@ -141,16 +133,12 @@ export default function Wallet() {
     });
 
     const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "M-Pesa request failed");
 
-    if (!res.ok) {
-      throw new Error(data.message || "M-Pesa request failed");
-    }
-
-    // STK push sent — show pending state
     setMpesaPending(true);
     setSuccessMsg("STK push sent! Check your phone and enter your M-Pesa PIN.");
 
-    // Poll balance every 4s for up to 40s to detect when callback credits the wallet
+    
     let attempts = 0;
     const poll = setInterval(async () => {
       attempts++;
@@ -175,7 +163,24 @@ export default function Wallet() {
     }, 4000);
   };
 
-  // ── Manual / Withdraw confirm ────────────────────────────────
+
+  const handleMpesaWithdraw = async (parsed) => {
+    if (!phone.trim()) return setModalError("Enter your M-Pesa phone number");
+
+    const res = await fetch(`${API}/api/mpesa/withdraw`, {
+      method: "POST",
+      headers: authHeaders,
+      body: JSON.stringify({ amount: parsed, phone: phone.trim() }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Withdrawal failed");
+
+    setMpesaPending(true);
+    setSuccessMsg("Withdrawal initiated! Funds will arrive on your M-Pesa shortly.");
+    await fetchWalletData();
+    setTimeout(() => closeModal(), 3000);
+  };
   const handleConfirm = async () => {
     setModalError("");
     const parsed = parseFloat(amount);
@@ -191,37 +196,42 @@ export default function Wallet() {
     setModalLoading(true);
 
     try {
-      if (modal === "deposit" && depositMethod === "mpesa") {
-        await handleMpesaDeposit(parsed);
-        return; // polling takes over; don't run the rest
+      
+      if (modal === "deposit") {
+        if (payMethod === "mpesa") {
+          await handleMpesaDeposit(parsed);
+        } else {
+          const res = await fetch(`${API}/api/wallet/deposit`, {
+            method: "POST",
+            headers: authHeaders,
+            body: JSON.stringify({ amount: parsed }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Deposit failed");
+          setSuccessMsg(`$${parsed.toFixed(2)} deposited successfully!`);
+          await fetchWalletData();
+          setTimeout(() => closeModal(), 1500);
+        }
+        return;
       }
 
-      // Manual deposit or withdrawal
-      const endpoint =
-        modal === "deposit"
-          ? `${API}/api/wallet/deposit`
-          : `${API}/api/wallet/withdraw`;
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: authHeaders,
-        body: JSON.stringify({ amount: parsed }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || `${modal} failed`);
+     
+      if (modal === "withdraw") {
+        if (payMethod === "mpesa") {
+          await handleMpesaWithdraw(parsed);
+        } else {
+          const res = await fetch(`${API}/api/wallet/withdraw`, {
+            method: "POST",
+            headers: authHeaders,
+            body: JSON.stringify({ amount: parsed }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "Withdrawal failed");
+          setSuccessMsg(`$${parsed.toFixed(2)} withdrawn successfully!`);
+          await fetchWalletData();
+          setTimeout(() => closeModal(), 1500);
+        }
       }
-
-      setSuccessMsg(
-        modal === "deposit"
-          ? `$${parsed.toFixed(2)} deposited successfully!`
-          : `$${parsed.toFixed(2)} withdrawn successfully!`
-      );
-
-      await fetchWalletData();
-      setTimeout(() => closeModal(), 1500);
     } catch (err) {
       setModalError(err.message);
     } finally {
@@ -230,18 +240,21 @@ export default function Wallet() {
   };
 
   const fmt = (n) =>
-    n == null
-      ? "—"
-      : `$${Number(n).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+    n == null ? "—" : `$${Number(n).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 
-  // ── Derived UI flags ─────────────────────────────────────────
-  const isMpesaDeposit = modal === "deposit" && depositMethod === "mpesa";
+  const isMpesa = payMethod === "mpesa";
+
   const confirmLabel = () => {
     if (modalLoading) return "Processing...";
-    if (mpesaPending) return "Waiting for payment...";
-    if (isMpesaDeposit) return "Send STK Push";
-    return `Confirm ${modal ? modal.charAt(0).toUpperCase() + modal.slice(1) : ""}`;
+    if (mpesaPending) return "Pending...";
+    if (modal === "deposit") return isMpesa ? "Send STK Push" : "Confirm Deposit";
+    if (modal === "withdraw") return isMpesa ? "Withdraw via M-Pesa" : "Confirm Withdrawal";
+    return "Confirm";
   };
+
+  const depositMethods = [MPESA_METHOD, DIRECT_METHOD];
+  const withdrawMethods = [MPESA_METHOD, DIRECT_WITHDRAW];
+  const methods = modal === "deposit" ? depositMethods : withdrawMethods;
 
   return (
     <AppLayout>
@@ -249,6 +262,7 @@ export default function Wallet() {
 
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-yellow-400/5 blur-[120px] rounded-full pointer-events-none" />
 
+       
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -272,7 +286,7 @@ export default function Wallet() {
         <div className="grid lg:grid-cols-5 gap-8">
           <div className="lg:col-span-3 space-y-6">
 
-            {/* ── Card Carousel ── */}
+        
             <div className="relative">
               <div className="flex gap-3 mb-5">
                 {cards.map((c, i) => (
@@ -323,16 +337,12 @@ export default function Wallet() {
                   </div>
 
                   <div>
-                    <p className="text-black/60 text-xs uppercase tracking-widest mb-1">
-                      Available Balance
-                    </p>
+                    <p className="text-black/60 text-xs uppercase tracking-widest mb-1">Available Balance</p>
                     {loading ? (
                       <div className="h-12 w-48 bg-black/10 rounded-xl animate-pulse" />
                     ) : (
                       <p className="text-black text-5xl font-bold tracking-tight">
-                        {balanceVisible
-                          ? fmt(cards[activeCard].balance)
-                          : "••••••"}
+                        {balanceVisible ? fmt(cards[activeCard].balance) : "••••••"}
                       </p>
                     )}
                   </div>
@@ -340,7 +350,7 @@ export default function Wallet() {
               </AnimatePresence>
             </div>
 
-            {/* ── Action Buttons ── */}
+           
             <div className="grid grid-cols-2 gap-4">
               {[
                 { label: "Deposit", icon: ArrowDownLeft, action: "deposit", style: "bg-yellow-400 text-black hover:bg-yellow-300 shadow-yellow-400/20" },
@@ -357,7 +367,7 @@ export default function Wallet() {
               ))}
             </div>
 
-            {/* ── Stats ── */}
+        
             <div className="grid grid-cols-3 gap-4">
               {[
                 { label: "Total Sent", value: fmt(stats.totalSent), icon: ArrowUpRight, color: "text-red-400" },
@@ -391,7 +401,7 @@ export default function Wallet() {
             </div>
           </div>
 
-          {/* ── Recent Activity ── */}
+         
           <div className="lg:col-span-2">
             <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 h-full">
               <div className="flex justify-between items-center mb-6">
@@ -447,10 +457,6 @@ export default function Wallet() {
             </div>
           </div>
         </div>
-
-        {/* ══════════════════════════════════════════
-            MODAL — Deposit / Withdraw
-        ══════════════════════════════════════════ */}
         <AnimatePresence>
           {modal && (
             <motion.div
@@ -474,26 +480,23 @@ export default function Wallet() {
                     : `Available balance: ${fmt(balance)}`}
                 </p>
 
-                {/* ── Deposit Method Selector (deposit only) ── */}
-                {modal === "deposit" && (
+                {/* ── Method Selector (both deposit & withdraw) ── */}
+                {!mpesaPending && (
                   <div className="grid grid-cols-2 gap-3 mb-6">
-                    {DEPOSIT_METHODS.map(({ id, label, icon: Icon, description }) => (
+                    {methods.map(({ id, label, icon: Icon, description }) => (
                       <button
                         key={id}
-                        onClick={() => {
-                          setDepositMethod(id);
-                          setModalError("");
-                        }}
+                        onClick={() => { setPayMethod(id); setModalError(""); }}
                         className={`flex flex-col items-start gap-1.5 p-4 rounded-2xl border transition text-left ${
-                          depositMethod === id
+                          payMethod === id
                             ? "border-yellow-400 bg-yellow-400/5"
                             : "border-zinc-700 hover:border-zinc-500 bg-zinc-800/50"
                         }`}
                       >
-                        <div className={`p-2 rounded-xl ${depositMethod === id ? "bg-yellow-400/15" : "bg-zinc-700"}`}>
-                          <Icon size={16} className={depositMethod === id ? "text-yellow-400" : "text-zinc-400"} />
+                        <div className={`p-2 rounded-xl ${payMethod === id ? "bg-yellow-400/15" : "bg-zinc-700"}`}>
+                          <Icon size={16} className={payMethod === id ? "text-yellow-400" : "text-zinc-400"} />
                         </div>
-                        <p className={`text-sm font-semibold ${depositMethod === id ? "text-yellow-400" : "text-white"}`}>
+                        <p className={`text-sm font-semibold ${payMethod === id ? "text-yellow-400" : "text-white"}`}>
                           {label}
                         </p>
                         <p className="text-zinc-500 text-[11px] leading-tight">{description}</p>
@@ -501,18 +504,18 @@ export default function Wallet() {
                     ))}
                   </div>
                 )}
-
-                {/* ── M-Pesa info banner ── */}
-                {isMpesaDeposit && !mpesaPending && !successMsg && (
+                {isMpesa && !mpesaPending && !successMsg && (
                   <div className="flex items-start gap-3 mb-5 px-4 py-3 bg-green-500/8 border border-green-500/20 rounded-2xl">
                     <Smartphone size={16} className="text-green-400 mt-0.5 shrink-0" />
                     <p className="text-green-300 text-xs leading-relaxed">
-                      Enter your M-Pesa number and amount. You'll receive an STK push prompt on your phone to confirm.
+                      {modal === "deposit"
+                        ? "Enter your M-Pesa number and amount. You'll receive an STK push prompt to confirm."
+                        : "Enter your M-Pesa number. Funds will be sent directly to your phone after confirmation."}
                     </p>
                   </div>
                 )}
 
-                {/* ── Success message ── */}
+             
                 {successMsg && (
                   <div className="mb-5 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center gap-3">
                     {mpesaPending ? (
@@ -524,15 +527,15 @@ export default function Wallet() {
                   </div>
                 )}
 
-                {/* ── Error message ── */}
+             
                 {modalError && (
                   <div className="mb-5 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-sm">
                     {modalError}
                   </div>
                 )}
 
-                {/* ── Phone number field (M-Pesa only) ── */}
-                {isMpesaDeposit && !mpesaPending && (
+              
+                {isMpesa && !mpesaPending && (
                   <div className="relative mb-4">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-medium pointer-events-none">
                       🇰🇪
@@ -548,11 +551,11 @@ export default function Wallet() {
                   </div>
                 )}
 
-                {/* ── Amount field ── */}
+           
                 {!mpesaPending && (
                   <div className="relative mb-6">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-400 font-bold text-lg pointer-events-none">
-                      {isMpesaDeposit ? "KES" : "$"}
+                      {isMpesa ? "KES" : "$"}
                     </span>
                     <input
                       type="number"
@@ -567,20 +570,27 @@ export default function Wallet() {
                   </div>
                 )}
 
-                {/* ── M-Pesa pending state ── */}
+           
                 {mpesaPending && (
                   <div className="flex flex-col items-center gap-4 py-4 mb-6">
                     <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
                       <Loader size={28} className="text-green-400 animate-spin" />
                     </div>
                     <div className="text-center">
-                      <p className="text-white font-semibold text-sm">Waiting for M-Pesa confirmation</p>
-                      <p className="text-zinc-500 text-xs mt-1">Enter your PIN on your phone to complete</p>
+                      <p className="text-white font-semibold text-sm">
+                        {modal === "deposit"
+                          ? "Waiting for M-Pesa confirmation"
+                          : "Processing your withdrawal"}
+                      </p>
+                      <p className="text-zinc-500 text-xs mt-1">
+                        {modal === "deposit"
+                          ? "Enter your PIN on your phone to complete"
+                          : "Funds will arrive on your M-Pesa shortly"}
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {/* ── Buttons ── */}
                 <div className="flex gap-3">
                   <button
                     onClick={closeModal}
@@ -592,7 +602,7 @@ export default function Wallet() {
                   {!mpesaPending && (
                     <button
                       onClick={handleConfirm}
-                      disabled={modalLoading || (!!successMsg && !mpesaPending)}
+                      disabled={modalLoading || !!successMsg}
                       className="flex-1 py-3.5 rounded-2xl bg-yellow-400 text-black font-bold text-sm hover:bg-yellow-300 transition disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                       {modalLoading && <Loader size={14} className="animate-spin" />}
@@ -601,8 +611,8 @@ export default function Wallet() {
                   )}
                 </div>
 
-                {/* ── M-Pesa branding note ── */}
-                {isMpesaDeposit && (
+            
+                {isMpesa && (
                   <p className="text-center text-zinc-600 text-[11px] mt-4">
                     Powered by Safaricom M-Pesa · Lipa Na M-Pesa
                   </p>

@@ -7,7 +7,7 @@ export default function Topbar() {
       <h2 className="text-lg font-semibold text-white">Welcome back 👋</h2>
       
       <div className="bg-gold text-black px-4 py-2 rounded-xl font-semibold shadow-[0_0_15px_rgba(255,215,0,0.5)]">
-        $4,350
+        $0
       </div>
     </div>
   );

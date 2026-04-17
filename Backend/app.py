@@ -10,6 +10,7 @@ from routes.auth import auth_bp
 from routes.wallet import wallet_bp
 from routes.transaction import transaction_bp
 from routes.mpesa import mpesa_bp
+from routes.Beneficiaries import Beneficiaries_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -37,6 +38,7 @@ app.register_blueprint(auth_bp, url_prefix="/api/auth")
 app.register_blueprint(wallet_bp, url_prefix="/api/wallet")
 app.register_blueprint(transaction_bp, url_prefix="/api/transactions")
 app.register_blueprint(mpesa_bp, url_prefix="/api/mpesa")
+app.register_blueprint(Beneficiaries_bp, url_prefix="/api/beneficiaries")
 
 if __name__ == "__main__":
     app.run(debug=True)

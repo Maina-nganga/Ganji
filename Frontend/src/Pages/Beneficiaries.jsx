@@ -26,7 +26,7 @@ export default function Beneficiaries() {
 
   const [deleteId, setDeleteId] = useState(null);
 
-  // ── Fetch ─────────────────────────────────────────────────────
+  
   const fetchBeneficiaries = async () => {
     setLoading(true);
     setError("");
@@ -46,7 +46,7 @@ export default function Beneficiaries() {
     if (token) fetchBeneficiaries();
   }, [token]);
 
-  // ── Add ───────────────────────────────────────────────────────
+  
   const handleAdd = async () => {
     setFormError("");
     if (!newBeneficiary.name.trim() || !newBeneficiary.account.trim()) {
@@ -73,7 +73,7 @@ export default function Beneficiaries() {
     }
   };
 
-  // ── Delete ────────────────────────────────────────────────────
+ 
   const handleDelete = async (id) => {
     setDeleteId(id);
     try {
@@ -118,7 +118,6 @@ export default function Beneficiaries() {
 
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-yellow-400/5 blur-[180px] rounded-full pointer-events-none" />
 
-        {/* ── Header ── */}
         <div className="relative z-10 flex justify-between items-center mb-10">
           <div>
             <p className="text-zinc-500 text-sm tracking-widest uppercase mb-1">Contacts</p>
@@ -134,7 +133,7 @@ export default function Beneficiaries() {
           </button>
         </div>
 
-        {/* ── Search ── */}
+      
         <div className="relative z-10 mb-8">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input
@@ -152,7 +151,7 @@ export default function Beneficiaries() {
           </div>
         )}
 
-        {/* ── Grid ── */}
+       
         <div className="relative z-10 grid md:grid-cols-2 xl:grid-cols-3 gap-5">
           {loading ? (
             Array(4).fill(0).map((_, i) => (
@@ -174,7 +173,7 @@ export default function Beneficiaries() {
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-zinc-900 border border-zinc-800 hover:border-yellow-400/30 rounded-2xl p-6 transition group"
               >
-                {/* Avatar + Name */}
+             
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400 font-bold text-lg shrink-0">
                     {b.name.slice(0, 2).toUpperCase()}
@@ -185,7 +184,7 @@ export default function Beneficiaries() {
                   </div>
                 </div>
 
-                {/* Details */}
+             
                 <div className="space-y-1.5 mb-5">
                   {b.bank && (
                     <div className="flex items-center gap-2 text-zinc-400 text-xs">
@@ -201,7 +200,7 @@ export default function Beneficiaries() {
                   )}
                 </div>
 
-                {/* Actions */}
+               
                 <div className="flex gap-3">
                   <button className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-yellow-400 text-black text-xs font-semibold hover:bg-yellow-300 transition">
                     <Send size={12} /> Send Money
@@ -221,9 +220,7 @@ export default function Beneficiaries() {
           )}
         </div>
 
-        {/* ══════════════════════════════════════════
-            MODAL — Add Beneficiary
-        ══════════════════════════════════════════ */}
+        
         <AnimatePresence>
           {showModal && (
             <motion.div

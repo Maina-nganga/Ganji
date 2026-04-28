@@ -1,0 +1,17 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Database
+instance/ganji.db
+
+# Environment variables
+.env
+
+# Migrations cache
+migrations/__pycache__/
+migrations/versions/__pycache__/

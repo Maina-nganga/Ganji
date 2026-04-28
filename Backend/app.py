@@ -15,8 +15,12 @@ from routes.Beneficiaries import Beneficiaries_bp
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
-jwt.init_app(app)
+
+# Import all models so Alembic can detect them
+from models import User, LedgerAccount, LedgerEntry, Transaction, AuditLog, Beneficiary
+
 migrate.init_app(app, db)
+jwt.init_app(app)
 bcrypt.init_app(app)
 
 CORS(

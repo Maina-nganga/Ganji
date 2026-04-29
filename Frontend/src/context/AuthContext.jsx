@@ -4,10 +4,9 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem("ganji_token"));
+  const [token, setToken] = useState(() => sessionStorage.getItem("ganji_token")); // ✅ fixed
   const [loading, setLoading] = useState(true);
 
-  
   const fetchUser = async (accessToken) => {
     try {
       const res = await fetch("http://127.0.0.1:5000/api/auth/me", {
@@ -17,13 +16,12 @@ export function AuthProvider({ children }) {
       });
 
       if (!res.ok) {
-        
         logout();
         return;
       }
 
       const data = await res.json();
-      setUser(data); 
+      setUser(data);
     } catch (err) {
       console.error("Failed to fetch user:", err);
       logout();
@@ -31,7 +29,6 @@ export function AuthProvider({ children }) {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     if (token) {
@@ -42,13 +39,13 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (accessToken) => {
-    localStorage.setItem("ganji_token", accessToken);
+    sessionStorage.setItem("ganji_token", accessToken);
     setToken(accessToken);
-    await fetchUser(accessToken); 
+    await fetchUser(accessToken);
   };
 
   const logout = () => {
-    localStorage.removeItem("ganji_token");
+    sessionStorage.removeItem("ganji_token");
     setToken(null);
     setUser(null);
     setLoading(false);

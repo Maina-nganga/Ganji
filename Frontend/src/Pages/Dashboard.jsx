@@ -68,12 +68,12 @@ export default function Dashboard() {
     { name: "Received", value: stats.totalReceived || 0 },
   ];
   const trendData = [
-    { month: "Jan", sent: 400, received: 240 },
-    { month: "Feb", sent: 300, received: 139 },
-    { month: "Mar", sent: 500, received: 380 },
-    { month: "Apr", sent: 478, received: 290 },
-    { month: "May", sent: 589, received: 480 },
-    { month: "Jun", sent: 639, received: 520 },
+    { month: "Jan", sent: 0, received: 0 },
+    { month: "Feb", sent: 0, received: 0 },
+    { month: "Mar", sent: 0, received: 0 },
+    { month: "Apr", sent: 0, received: 0 },
+    { month: "May", sent: 0, received: 0 },
+    { month: "Jun", sent: 0, received: 0 },
   ];
   const fmt = (n) =>
     n == null ? "—" : `$${Number(n).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;

@@ -11,16 +11,13 @@ from routes.wallet import wallet_bp
 from routes.transaction import transaction_bp
 from routes.mpesa import mpesa_bp
 from routes.Beneficiaries import Beneficiaries_bp
+from routes.users import users_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
 db.init_app(app)
-
-# Import all models so Alembic can detect them
-from models import User, LedgerAccount, LedgerEntry, Transaction, AuditLog, Beneficiary
-
-migrate.init_app(app, db)
 jwt.init_app(app)
+migrate.init_app(app, db)
 bcrypt.init_app(app)
 
 CORS(
@@ -43,6 +40,7 @@ app.register_blueprint(wallet_bp, url_prefix="/api/wallet")
 app.register_blueprint(transaction_bp, url_prefix="/api/transactions")
 app.register_blueprint(mpesa_bp, url_prefix="/api/mpesa")
 app.register_blueprint(Beneficiaries_bp, url_prefix="/api/beneficiaries")
+app.register_blueprint(users_bp, url_prefix="/api/users")
 
 if __name__ == "__main__":
     app.run(debug=True)

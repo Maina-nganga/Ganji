@@ -137,6 +137,37 @@ def transfer():
     }), 201
 
 
+@transaction_bp.route("/monthly", methods=["GET"])
+@jwt_required()
+def get_monthly_trend():
+    from sqlalchemy import extract, func
+    user_id = int(get_jwt_identity())
+
+    rows = db.session.query(
+        extract("year",  Transaction.created_at).label("year"),
+        extract("month", Transaction.created_at).label("month"),
+        func.sum(
+            db.case((Transaction.sender_id == user_id, Transaction.amount), else_=0)
+        ).label("sent"),
+        func.sum(
+            db.case((Transaction.receiver_id == user_id, Transaction.amount), else_=0)
+        ).label("received"),
+    ).filter(
+        (Transaction.sender_id == user_id) | (Transaction.receiver_id == user_id)
+    ).group_by("year", "month").order_by("year", "month").all()
+
+    MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    result = [
+        {
+            "month": MONTHS[int(r.month) - 1],
+            "sent":     round(r.sent or 0, 2),
+            "received": round(r.received or 0, 2),
+        }
+        for r in rows
+    ]
+    return jsonify({"trend": result})
+
+
 @transaction_bp.route("/summary", methods=["GET"])
 @jwt_required()
 def get_summary():

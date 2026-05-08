@@ -15,6 +15,60 @@ pending_withdrawals = {}
 
 
 
+@mpesa_bp.route("/pay-till", methods=["POST"])
+@jwt_required()
+def initiate_till_payment():
+    user_id = int(get_jwt_identity())
+    data = request.json
+
+    phone       = data.get("phone")
+    amount      = data.get("amount")
+    till_number = data.get("till_number")
+    account_ref = data.get("account_ref", "Payment")
+
+    if not all([phone, amount, till_number]):
+        return jsonify({"message": "phone, amount and till_number are required"}), 400
+
+    try:
+        response = pay_till(phone, float(amount), till_number, account_ref)
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+    if response.get("ResponseCode") == "0":
+        checkout_id = response["CheckoutRequestID"]
+        pending_deposits[checkout_id] = {"user_id": user_id, "amount": float(amount)}
+        return jsonify({"message": "STK push sent to Till. Check your phone.", "checkout_request_id": checkout_id}), 200
+
+    return jsonify({"message": "Till payment failed", "details": response}), 400
+
+
+@mpesa_bp.route("/pay-paybill", methods=["POST"])
+@jwt_required()
+def initiate_paybill_payment():
+    user_id = int(get_jwt_identity())
+    data = request.json
+
+    phone          = data.get("phone")
+    amount         = data.get("amount")
+    paybill_number = data.get("paybill_number")
+    account_number = data.get("account_number")
+
+    if not all([phone, amount, paybill_number, account_number]):
+        return jsonify({"message": "phone, amount, paybill_number and account_number are required"}), 400
+
+    try:
+        response = pay_paybill(phone, float(amount), paybill_number, account_number)
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+    if response.get("ResponseCode") == "0":
+        checkout_id = response["CheckoutRequestID"]
+        pending_deposits[checkout_id] = {"user_id": user_id, "amount": float(amount)}
+        return jsonify({"message": "STK push sent to Paybill. Check your phone.", "checkout_request_id": checkout_id}), 200
+
+    return jsonify({"message": "Paybill payment failed", "details": response}), 400
+
+
 @mpesa_bp.route("/stk-push", methods=["POST"])
 @jwt_required()
 def initiate_stk():

@@ -1,13 +1,23 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Wallet,
   Users,
   ArrowRightLeft,
   LogOut,
+  Send,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function Sidebar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div className="w-64 h-screen bg-[#0E0E10] shadow-xl flex flex-col justify-between p-6 hidden md:flex rounded-l-3xl overflow-hidden fixed left-0 top-0 z-50">
       <div className="absolute right-0 top-0 w-[400px] h-[400px] bg-gold opacity-20 blur-[180px] rounded-full -z-10"></div>
@@ -46,11 +56,12 @@ export default function Sidebar() {
           </Link>
         </nav>
       </div>
-      <Link to="/login">
-        <button className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#111] text-gold hover:bg-gold hover:text-black transition font-semibold shadow-md">
-          <LogOut size={1} /> Sign Out
-        </button>
-      </Link>
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#111] text-gold hover:bg-gold hover:text-black transition font-semibold shadow-md w-full"
+      >
+        <LogOut size={16} /> Sign Out
+      </button>
     </div>
   );
 }

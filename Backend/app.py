@@ -22,7 +22,7 @@ bcrypt.init_app(app)
 
 CORS(
     app,
-    resources={r"/api/*": {"origins": "http://localhost:5173"}},
+    resources={r"/api/*": {"origins": "https://ganji1.netlify.app"}},
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization"]
 )

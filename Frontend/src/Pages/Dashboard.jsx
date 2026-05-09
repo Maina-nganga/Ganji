@@ -17,7 +17,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API = "http://127.0.0.1:5000";
+  const API = "https://ganji-f4ne.onrender.com";
 
   const authHeaders = {
     "Content-Type": "application/json",

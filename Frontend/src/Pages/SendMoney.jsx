@@ -11,7 +11,7 @@ const STEPS = { SEARCH: "search", CONFIRM: "confirm", SUCCESS: "success" };
 
 export default function SendMoney() {
   const { token } = useAuth();
-  const API = "http://127.0.0.1:5000";
+  const API = "https://ganji-f4ne.onrender.com";
   const authHeaders = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,

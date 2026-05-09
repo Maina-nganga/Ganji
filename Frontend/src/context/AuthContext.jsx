@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
 
   const fetchUser = async (accessToken) => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/auth/me", {
+      const res = await fetch("https://ganji-f4ne.onrender.com/api/auth/me", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

@@ -12,7 +12,7 @@ const statusStyles = {
 
 export default function Transactions() {
   const { token } = useAuth();
-  const API = "http://127.0.0.1:5000";
+  const API = "https://ganji-f4ne.onrender.com";
 
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);

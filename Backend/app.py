@@ -22,9 +22,14 @@ bcrypt.init_app(app)
 
 CORS(
     app,
-    resources={r"/api/*": {"origins": "https://ganji1.netlify.app"}},
+    resources={r"/api/*": {"origins": [
+        "https://ganji1.netlify.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ]}},
     supports_credentials=True,
-    allow_headers=["Content-Type", "Authorization"]
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 )
 
 logging.basicConfig(level=logging.DEBUG)
@@ -43,6 +48,6 @@ app.register_blueprint(Beneficiaries_bp, url_prefix="/api/beneficiaries")
 app.register_blueprint(users_bp, url_prefix="/api/users")
 
 if __name__ == "__main__":
-     import os
+    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

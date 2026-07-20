@@ -72,7 +72,7 @@ export default function Register() {
      
       <nav className="flex justify-between items-center px-12 py-8 relative z-10">
         <h1 className="text-xl font-semibold">
-          <span className="text-gold">AurraPay</span>
+          <span className="text-gold">Ganji</span>
         </h1>
 
         <Link
@@ -97,7 +97,7 @@ export default function Register() {
           </motion.h1>
 
           <p className="text-gray-400 mt-6 max-w-md text-sm">
-            Join AurraPay and start sending money securely with
+            Join Ganji and start sending money securely with
             enterprise-level digital wallet technology.
           </p>
         </div>

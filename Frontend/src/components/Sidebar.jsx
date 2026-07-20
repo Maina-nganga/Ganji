@@ -10,7 +10,7 @@ const NAV = [
   { to: "/wallet",       icon: Wallet,          label: "Wallet" },
   { to: "/beneficiaries",icon: Users,           label: "Beneficiaries" },
   { to: "/transactions", icon: ArrowRightLeft,  label: "Transactions" },
-  { to: "/send",         icon: Send,            label: "Send Money" },
+
 ];
 
 export default function Sidebar({ open, onClose }) {

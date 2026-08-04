@@ -64,7 +64,6 @@ All endpoints are prefixed with `/api`.
 
 ### Prerequisites
 - Python 3.10+
-- Node.js 18+
 - MySQL (optional — SQLite is used by default if `DATABASE_URL` isn't set)
 
 ### Backend setup

@@ -1,4 +1,6 @@
-# Ganji 
+# Ganji
+
+[![CI](https://github.com/Maina-nganga/Ganji/actions/workflows/ci.yml/badge.svg)](https://github.com/Maina-nganga/Ganji/actions/workflows/ci.yml)
 
 A mobile-money wallet application modeled on M-Pesa, built with a Flask REST API and a React frontend. Ganji supports user wallets, peer-to-peer transfers, M-Pesa STK Push/paybill/till deposits and withdrawals, beneficiary management, and double-entry ledger accounting for transaction integrity.
 
@@ -28,24 +30,23 @@ A mobile-money wallet application modeled on M-Pesa, built with a Flask REST API
 
 ## Project structure
 
-```
 Ganji/
 ├── Backend/
-│   ├── app.py              # App factory, blueprint registration, CORS config
-│   ├── config.py           # Environment-driven configuration
-│   ├── extensions.py       # db, jwt, migrate, bcrypt instances
-│   ├── models/              # SQLAlchemy models (User, Transaction, Ledger, Beneficiary, AuditLog)
-│   ├── routes/              # Blueprints: auth, wallet, transaction, mpesa, beneficiaries, users
-│   ├── services/             # Business logic: fraud detection, ledger posting, M-Pesa client
-│   ├── migrations/          # Alembic migration history
-│   └── requirements.txt
+│ ├── app.py # App factory, blueprint registration, CORS config
+│ ├── config.py # Environment-driven configuration
+│ ├── extensions.py # db, jwt, migrate, bcrypt instances
+│ ├── models/ # SQLAlchemy models (User, Transaction, Ledger, Beneficiary, AuditLog)
+│ ├── routes/ # Blueprints: auth, wallet, transaction, mpesa, beneficiaries, users
+│ ├── services/ # Business logic: fraud detection, ledger posting, M-Pesa client
+│ ├── migrations/ # Alembic migration history
+│ └── requirements.txt
 └── Frontend/
-    ├── src/
-    │   ├── Pages/            # Landing, Login, Register, Dashboard, Wallet, Transactions, Beneficiaries, AdminDashboard
-    │   ├── components/       # Navbar, Sidebar, TopBar, Card, Button, ProtectedRoute
-    │   └── context/          # AuthContext
-    └── package.json
-```
+├── src/
+│ ├── Pages/ # Landing, Login, Register, Dashboard, Wallet, Transactions, Beneficiaries, AdminDashboard
+│ ├── components/ # Navbar, Sidebar, TopBar, Card, Button, ProtectedRoute
+│ └── context/ # AuthContext
+└── package.json
+
 
 ## API overview
 
@@ -91,20 +92,37 @@ npm run dev                     # runs on http://localhost:5173
 
 Create a `Backend/.env` file (see `Backend/.env.example`) with at least:
 
-```
 SECRET_KEY=
 JWT_SECRET_KEY=
-DATABASE_URL=                   # e.g. mysql+pymysql://user:pass@host/dbname
+DATABASE_URL= # e.g. mysql+pymysql://user:pass@host/dbname
 MPESA_CONSUMER_KEY=
 MPESA_CONSUMER_SECRET=
 MPESA_SHORTCODE=
 MPESA_PASSKEY=
 MPESA_CALLBACK_URL=
+
+
+## Testing
+
+The backend has a pytest suite covering auth, wallets, transfers, and the ledger/fraud services, run against an isolated in-memory SQLite database. CI runs this automatically on every push and pull request via GitHub Actions (`.github/workflows/ci.yml`).
+
+```bash
+cd Backend
+pip install -r requirements-dev.txt
+pytest                       # run the full suite
+pytest --cov=. --cov-report=term-missing   # with coverage
 ```
+
+> **Note:** a couple of tests intentionally document known bugs rather than hide them — see `tests/test_auth.py::test_register_duplicate_email_currently_crashes` and `tests/test_transactions.py::test_large_transfer_is_currently_always_blocked_as_high_risk`. Update those tests once the underlying issues are fixed.
 
 ## Roadmap
 
-- [ ] Automated test coverage (backend + frontend)
+- [x] Backend automated test coverage
+- [x] CI pipeline for tests/lint/build on every push
+- [ ] Frontend test coverage (Vitest + React Testing Library)
+- [ ] Fix duplicate-email registration crash (unhandled `IntegrityError`)
+- [ ] Fix fraud-score scale mismatch (`risk >= 0.9` compared against a 0–40 score range)
+- [ ] Register the `admin` blueprint in `app.py` (currently defined but unused)
 - [ ] Rate limiting on auth and M-Pesa endpoints
 - [ ] KYC verification flow
 

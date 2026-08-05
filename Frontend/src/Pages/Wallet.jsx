@@ -148,7 +148,10 @@ export default function Wallet() {
           setSuccessMsg(`KES ${parsed.toFixed(2)} deposited via M-Pesa!`);
           setMpesaPending(false); await fetchWalletData(); setTimeout(() => closeModal(), 1800);
         }
-      } catch (_) {}
+      } catch {
+        // Transient network error while polling for M-Pesa confirmation —
+        // safe to ignore, the next poll (or the attempts>=10 timeout below) will catch up.
+      }
       if (attempts >= 10) { clearInterval(poll); setMpesaPending(false); setSuccessMsg("Payment initiated. Your balance will update shortly."); setTimeout(() => closeModal(), 2500); }
     }, 4000);
   };

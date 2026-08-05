@@ -58,6 +58,10 @@ export function AuthProvider({ children }) {
   );
 }
 
+// useAuth is a companion hook for AuthProvider; splitting it into its own file would only
+// affect Vite Fast Refresh in dev, not app correctness, and isn't worth the churn of
+// updating 9 importing files right now.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   return useContext(AuthContext);
 }

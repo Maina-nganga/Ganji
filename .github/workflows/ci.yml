@@ -30,7 +30,7 @@ jobs:
         env:
           SECRET_KEY: ci-test-secret
           JWT_SECRET_KEY: ci-test-jwt-secret
-          DATABASE_URL: sqlite:///:memory:
+          DATABASE_URL: "sqlite:///:memory:"
         run: pytest --cov=. --cov-report=term-missing
 
   frontend:

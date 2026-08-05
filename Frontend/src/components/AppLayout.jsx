@@ -1,11 +1,9 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import { Menu } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
 
 export default function AppLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useAuth();
 
   return (
     <div className="flex min-h-screen bg-[#0c0c0e]">

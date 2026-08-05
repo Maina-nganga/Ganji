@@ -79,7 +79,7 @@ export default function Dashboard() {
             <h1 className="text-2xl md:text-4xl font-bold">
               Welcome Back, <span className="text-yellow-400">{firstName}</span>
             </h1>
-            <p className="text-zinc-500 mt-1 text-sm">Here's your financial performance overview.</p>
+            <p className="text-zinc-500 mt-1 text-sm">Here&apos;s your financial performance overview.</p>
           </div>
           <button
             onClick={() => navigate("/send")}

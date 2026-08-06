@@ -12,13 +12,10 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
-  const [waking, setWaking]     = useState(true);
 
- 
+  
   useEffect(() => {
-    fetch(`${API}/api/auth/login`, { method: "OPTIONS" })
-      .catch(() => {})
-      .finally(() => setWaking(false));
+    fetch(`${API}/api/auth/login`, { method: "OPTIONS" }).catch(() => {});
   }, []);
 
   const handleSubmit = async (e) => {
@@ -38,12 +35,6 @@ export default function Login() {
     finally { setLoading(false); }
   };
 
-  const buttonLabel = () => {
-    if (waking)   return "Connecting to server...";
-    if (loading)  return "Logging in...";
-    return "LOGIN";
-  };
-
   return (
     <div className="min-h-screen bg-[#0E0E10] text-white relative overflow-hidden">
       <div className="absolute right-0 top-0 w-[400px] h-[400px] md:w-[600px] md:h-[600px] bg-gold opacity-20 blur-[180px] rounded-full" />
@@ -54,14 +45,6 @@ export default function Login() {
           Sign Up
         </Link>
       </nav>
-
-    
-      {waking && (
-        <div className="relative z-10 mx-6 md:mx-12 mb-2 flex items-center gap-2 px-4 py-2.5 bg-yellow-400/10 border border-yellow-400/20 rounded-xl text-yellow-400 text-xs">
-          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse shrink-0" />
-          Waking up the server, please wait a moment...
-        </div>
-      )}
 
       <div className="grid md:grid-cols-2 items-center px-6 md:px-12 mt-6 md:mt-10 relative z-10 gap-8">
 
@@ -109,12 +92,12 @@ export default function Login() {
                 />
               </div>
 
-              <button type="submit" disabled={loading || waking}
+              <button type="submit" disabled={loading}
                 className="w-full py-4 rounded-full bg-gold text-black font-semibold text-base hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] transition disabled:opacity-60 flex items-center justify-center gap-2">
-                {(waking || loading) && (
+                {loading && (
                   <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                 )}
-                {buttonLabel()}
+                {loading ? "Logging in..." : "LOGIN"}
               </button>
 
               <p className="text-center text-sm text-gray-400">
